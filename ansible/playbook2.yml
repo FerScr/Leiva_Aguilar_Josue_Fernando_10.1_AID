@@ -1,0 +1,70 @@
+---
+- name: Instalacion de Apache
+  hosts: 192.168.137.246
+  become: yes
+  tasks:
+    - name: Instalar Apache
+      package:
+        name: httpd
+        state: present
+
+    - name: Iniciar Apache
+      service:
+        name: httpd
+        state: started
+        enabled: yes
+
+    - name: Asegurarse de que firewalld esté instalado
+      package:
+        name: firewalld
+        state: present
+
+    - name: Iniciar y habilitar firewalld
+      service:
+        name: firewalld
+        state: started
+        enabled: yes
+
+    - name: Configurar Firewall para permitir HTTP
+      firewalld:
+        service: http
+        permanent: yes
+        state: enabled
+        immediate: yes
+
+    - name: Configurar Firewall para permitir HTTPS
+      firewalld:
+        service: https
+        permanent: yes
+        state: enabled
+        immediate: yes
+
+    - name: Crear grupo web
+      group:
+        name: web
+        state: present
+
+    - name: Crear usuario webadm
+      user:
+        name: webadm
+        comment: "Administrador WEB"
+        password: "{{ 'Qwer1234%%' | password_hash('sha512') }}"
+        group: web
+        append: yes
+
+    - name: Ajustar permisos de carpeta en /var/www/html
+      file:
+        path: /var/www/html
+        owner: root
+        group: web
+        state: directory
+        mode: '2775'
+
+    - name: Crear página web predeterminada
+      copy:
+        content: "Hola desde {{ ansible_fqdn }} en {{ ansible_default_ipv4.address }}"
+        dest: /var/www/html/index.html
+        owner: webadm
+        group: web
+        mode: '0664'
+

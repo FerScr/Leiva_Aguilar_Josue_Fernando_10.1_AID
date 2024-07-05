@@ -1,0 +1,55 @@
+---
+#- name: Instalacion de apache
+- hosts: 192.168.137.246
+  tasks:
+  - name: Instalar apache
+    package:
+      name: httpd
+      state: present
+
+  - name: Iniciar apache
+    service:
+      name: httpd
+      state: started
+
+  - name: Config Firewall
+    firewalld:
+      service: {http https}
+      immediate: true
+      permanent: true
+      state: enabled
+
+  - name: Crear Grupo Admin
+    group:
+      name: web
+      state: present
+
+  - name: Crear usuario Admin
+    user:
+      name: webadm
+      comment: "Administrador WEB"
+      password: "{{ 'Qwer1234%%' | password_hash('sha512') }}"
+      group: web
+      append: yes
+
+  - name: Permisos de carpeta
+    file:
+      path: /var/www/html
+      owner: root
+      group: web
+      state: directory
+      mode: u=rwx,g=rwx,o=rx,g+s
+
+  - name: Crear Pagina Default
+    copy:
+      content: "Hola desde {{ ansible_fqdn }} en {{ ansible_default_ipv4.address }}"
+      dest: /var/www/html/index.html
+      owner: webadm
+      group: web
+      mode: u=rw,g=rw,o=r
+
+
+
+
+
+
