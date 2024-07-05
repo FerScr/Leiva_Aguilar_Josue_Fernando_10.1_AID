@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>ProductoParcial2</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+  }
+  .container {
+    background-color: #d3d3d3;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    max-width: 600px;
+    width: 100%;
+    overflow: hidden;
+  }
+  h1 {
+    margin-bottom: 20px;
+  }
+  select, input[type="submit"], .nav-link {
+    margin: 10px 0;
+  }
+  input[type="submit"] {
+    padding: 10px 20px;
+    font-size: 16px;
+    color: white;
+    background-color: #28a745;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  input[type="submit"]:hover {
+    background-color: #218838;
+  }
+  .nav-link {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: white;
+    background-color: #007bff;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+  }
+  .nav-link:hover {
+    background-color: #0056b3;
+  }
+  .terminal {
+    background-color: black;
+    color: white;
+    font-family: monospace;
+    padding: 10px;
+    margin-top: 20px;
+    border-radius: 4px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    max-height: 300px;
+    overflow-y: scroll;
+    text-align: left;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Josser's</h1>
+  <form id="playbookForm" action="/run_playbook" method="post">
+    <label for="playbook">Selecciona el Playbook:</label><br>
+    <select id="playbook" name="playbook">
+      {% for playbook in playbooks %}
+      <option value="{{ playbook }}">{{ playbook }}</option>
+      {% endfor %}
+    </select><br><br>
+    <input type="submit" value="Ejecutar Playbook">
+  </form>
+  <a href="/playbook_factory" class="nav-link">Fábrica de Playbooks</a>
+  <div id="terminalOutput" class="terminal"></div>
+</div>
+
+<script>
+  const playbookForm = document.getElementById('playbookForm');
+  const terminalOutput = document.getElementById('terminalOutput');
+
+  playbookForm.addEventListener('submit', function(event) {
+    event.preventDefault();
+[root@localhost templates]# ls
+index.html  output.html  playbook_factory.html
+[root@localhost templates]# cat playbook_factory.html
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Fábrica de Playbooks</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+  }
+  .container {
+    background-color: #d3d3d3;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    max-width: 800px;
+    width: 100%;
+  }
+  h1 {
+    margin-bottom: 20px;
+  }
+  textarea, input[type="submit"], .nav-link {
+    margin: 10px 0;
+  }
+  textarea {
+    width: 100%;
+    height: 300px;
+    padding: 10px;
+    font-family: monospace;
+  }
+  input[type="submit"] {
+    padding: 10px 20px;
+    font-size: 16px;
+    color: white;
+    background-color: #28a745;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  input[type="submit"]:hover {
+    background-color: #218838;
+  }
+  .nav-link {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: white;
+    background-color: #007bff;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+  }
+  .nav-link:hover {
+    background-color: #0056b3;
+  }
+  select {
+    width: 100%;
+    padding: 10px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Fábrica de Playbooks</h1>
+  <form id="playbookForm" action="/save_playbook" method="post">
+    <label for="playbookSelect">Seleccionar o crear nuevo playbook:</label><br>
+    <select id="playbookSelect" name="playbook">
+      <option value="new">Nuevo Playbook</option>
+      {% for playbook in playbooks %}
+      <option value="{{ playbook }}">{{ playbook }}</option>
+      {% endfor %}
+    </select><br><br>
+    <div id="newPlaybookNameDiv" style="display: none;">
+      <label for="newPlaybookName">Nombre del nuevo playbook:</label><br>
+      <input type="text" id="newPlaybookName" name="newPlaybookName"><br><br>
+    </div>
+    <textarea id="playbookContent" name="playbookContent" placeholder="Escribe el contenido del playbook aquí..."></textarea><br>
+    <input type="submit" value="Guardar Playbook">
+  </form>
+  <a href="/" class="nav-link">Volver</a>
+</div>
+
+<script>
+  const playbookSelect = document.getElementById('playbookSelect');
+  const playbookContent = document.getElementById('playbookContent');
+  const newPlaybookNameDiv = document.getElementById('newPlaybookNameDiv');
+  const newPlaybookName = document.getElementById('newPlaybookName');
+
+  playbookSelect.addEventListener('change', function() {
+    if (this.value === 'new') {
+      playbookContent.value = '';
+      newPlaybookNameDiv.style.display = 'block';
+    } else {
+      newPlaybookNameDiv.style.display = 'none';
+      fetch('/get_playbook_content?playbook=' + encodeURIComponent(this.value))
+        .then(response => response.text())
+        .then(data => {
+          playbookContent.value = data;
+        });
+    }
+  });
+</script>
+</body>
+</html>
