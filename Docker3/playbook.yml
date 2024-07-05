@@ -1,0 +1,6 @@
+-name: Ejecutar tarea en el host remoto
+  hosts: all
+  task:
+    - name: Imprimir un mensaje en la consola
+      debug:
+        msg: "Hello from Ansible"
